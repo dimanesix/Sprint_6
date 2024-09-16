@@ -1,3 +1,4 @@
+import allure
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
@@ -73,6 +74,7 @@ class OrderPage:
     def click_on_next_button(self):
         self.driver.find_element(*self.next_button).click()
 
+    @allure.step('Заполняем первую часть формы')
     def fill_first_form(self, name, surname, address, metro_station, telephone):
         self.wait_for_load_first_order_form()
         self.set_name(name)
@@ -140,6 +142,7 @@ class OrderPage:
         if comment != "":
             self.driver.find_element(*self.comment_field).send_keys(comment)
 
+    @allure.step('Заполняем вторую часть формы')
     def fill_second_form(self, delivery_date, rental_period, color, comment):
         self.wait_for_load_second_order_form()
         self.select_delivery_date(delivery_date)
@@ -147,6 +150,7 @@ class OrderPage:
         self.select_color(color)
         self.set_comment(comment)
 
+    @allure.step('Нажимаем на кнопку сделать заказ')
     def click_on_make_order_button(self):
         self.driver.find_element(*self.make_order_button).click()
 
@@ -157,6 +161,7 @@ class OrderPage:
     def click_on_button_yes(self):
         self.driver.find_element(*self.yes_button).click()
 
+    @allure.step('Подтверждаем, что хотим сделать заказ')
     def confirm_order(self):
         self.wait_for_load_confirm_order_window()
         self.click_on_button_yes()
@@ -165,7 +170,9 @@ class OrderPage:
         WebDriverWait(self.driver, 3).until(
             expected_conditions.visibility_of_element_located(self.successful_order_window))
 
+    @allure.step('Проверяем появление сообщения об успешном создании заказа')
     def check_appearance_successful_order_window(self):
+        self.wait_for_load_successful_order_window()
         return test_data.SUCCESSFUL_ORDER_MESSAGE in self.driver.find_element(*self.successful_order_window).text
 
 

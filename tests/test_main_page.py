@@ -1,4 +1,5 @@
 import pytest
+import allure
 from selenium import webdriver
 import test_data
 from pages.main_page import MainPage
@@ -11,6 +12,8 @@ class TestImportantQuestionArea:
     def setup_class(cls):
         cls.driver = webdriver.Chrome()
 
+    @allure.title('Проверка, что по нажатию на "вопрос о важном" появляется ответ')
+    @allure.description('На странице скролим к вопросу, кликаем на него и проверяем, что появляется ответ')
     @pytest.mark.parametrize('question', ['1 question', '2 question', '3 question', '4 question', '5 question', '6 question', '7 question', '8 question'])
     def test_appearance_answer(self, question):
         question_number = int(question.split(' ')[0])

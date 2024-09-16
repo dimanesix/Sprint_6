@@ -1,3 +1,4 @@
+import allure
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
@@ -37,6 +38,7 @@ class MainPage:
     def click_on_order_button_nav(self):
         self.driver.find_element(*self.order_button_nav).click()
 
+    @allure.step('Проверяем точку входа с кнопки "Заказать" в шапке')
     def check_url_from_order_button_nav(self):
         self.wait_for_load_order_button_nav()
         self.click_on_order_button_nav()
@@ -52,6 +54,7 @@ class MainPage:
     def click_on_order_button_middle(self):
         self.driver.find_element(*self.order_button_middle).click()
 
+    @allure.step('Проверяем точку входа с кнопки "Заказать" в середине экрана')
     def check_url_from_order_button_middle(self):
         self.wait_for_load_order_button_middle()
         self.scroll_to_order_button_middle()
@@ -62,6 +65,7 @@ class MainPage:
         WebDriverWait(self.driver, 3).until(
             expected_conditions.visibility_of_element_located(self.yandex_logo))
 
+    @allure.step('Кликаем на логотип Яндекса')
     def click_on_yandex_logo(self):
         self.driver.find_element(*self.yandex_logo).click()
 
@@ -69,6 +73,7 @@ class MainPage:
         return WebDriverWait(self.driver, 10).until(
             lambda driver: self.driver.current_url != test_data.DZEN_REDIRECT_PAGE_URL)
 
+    @allure.step('Проверяем редирект на страницу Дзена')
     def check_yandex_logo_redirect(self):
         self.wait_for_load_yandex_logo()
         self.click_on_yandex_logo()
@@ -78,9 +83,11 @@ class MainPage:
         WebDriverWait(self.driver, 3).until(
             expected_conditions.visibility_of_element_located(self.scooter_logo))
 
+    @allure.step('Кликаем на логотип сервиса Яндекс Самокат')
     def click_on_scooter_logo(self):
         self.driver.find_element(*self.scooter_logo).click()
 
+    @allure.step('Проверяем переход на главную страницу')
     def check_scooter_logo_url(self):
         self.wait_for_load_scooter_logo()
         self.click_on_scooter_logo()
@@ -90,14 +97,17 @@ class MainPage:
         WebDriverWait(self.driver, 3).until(
             expected_conditions.visibility_of_element_located(self.important_question_reg))
 
+    @allure.step('Переходим к вопросу')
     def scroll_to_important_question(self, question_number):
         questions = self.driver.find_elements(*self.question_buttons)
         self.driver.execute_script(test_data.SCROLL_SCRIPT, questions[question_number - 1])
 
+    @allure.step('Кликаем на вопрос')
     def click_on_important_question(self, question_number):
         questions = self.driver.find_elements(*self.question_buttons)
         questions[question_number - 1].click()
 
+    @allure.step('Проверяем, что появляется ответ')
     def check_roll_down_answer_to_the_question(self, question_number):
         return self.driver.find_elements(*self.answers_to_questions)[question_number - 1].get_attribute('hidden')
 

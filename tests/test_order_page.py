@@ -1,3 +1,4 @@
+import allure
 import pytest
 from selenium import webdriver
 import test_data
@@ -12,6 +13,8 @@ class TestScooterOrder:
     def setup_class(cls):
         cls.driver = webdriver.Firefox()
 
+    @allure.title('Проверка равенства двух точек входа в сценарий заказа самоката')
+    @allure.description('Кликаем по обеим кнопкам, проверяем url перехода - он должен совпасть с url оформления заказа')
     def test_order_entry_points_equality(self):
         self.driver.get(test_data.MAIN_PAGE_URL)
         main_page = MainPage(self.driver)
@@ -22,6 +25,8 @@ class TestScooterOrder:
         assert first_entry_point == second_entry_point, 'Точки входа не совпадают!'
         self.driver.delete_all_cookies()
 
+    @allure.title('Проверка всего флоу позитивного сценария заказа самоката')
+    @allure.description('Заполняем форму, проверяем появление окна об успешном заказе, проверяем переходы по логотипам')
     @pytest.mark.parametrize('test_set', [test_data.TEST_SET_FIRST_ORDER, test_data.TEST_SET_SECOND_ORDER,
                                           test_data.TEST_SET_THIRD_ORDER])
     def test_successful_scooter_order(self, test_set):
@@ -42,7 +47,6 @@ class TestScooterOrder:
                                     test_set["comment"])
         order_page.click_on_make_order_button()
         order_page.confirm_order()
-        order_page.wait_for_load_successful_order_window()
         is_appeared = order_page.check_appearance_successful_order_window()
         assert is_appeared == True, 'Окно об успешном создании заказа не появляется!'
         self.driver.back()
