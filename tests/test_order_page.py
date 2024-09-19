@@ -14,24 +14,26 @@ class TestScooterOrder:
         cls.driver = webdriver.Firefox()
 
     @allure.title('Проверка равенства двух точек входа в сценарий заказа самоката')
-    @allure.description('Кликаем по обеим кнопкам, проверяем url перехода - он должен совпасть с url оформления заказа')
+    @allure.description('Кликаем по обеим кнопкам, проверяем url перехода - он должен совпасть с '
+                        'url оформления заказа')
     def test_order_entry_points_equality(self):
-        self.driver.get(test_data.MAIN_PAGE_URL)
         main_page = MainPage(self.driver)
+        main_page.open_page(test_data.MAIN_PAGE_URL)
         main_page.accept_cookie()
         first_entry_point = main_page.check_url_from_order_button_nav()
-        self.driver.back()
+        main_page.go_back()
         second_entry_point = main_page.check_url_from_order_button_middle()
         assert first_entry_point == second_entry_point, 'Точки входа не совпадают!'
-        self.driver.delete_all_cookies()
+        main_page.delete_all_cookie()
 
-    @allure.title('Проверка всего флоу позитивного сценария заказа самоката')
-    @allure.description('Заполняем форму, проверяем появление окна об успешном заказе, проверяем переходы по логотипам')
+    @allure.title('Проверка всего флоу целиком позитивного сценария заказа самоката')
+    @allure.description('Заполняем форму -> заказываем самокат -> проверяем появление окна '
+                        'об успешном заказе -> проверяем переходы по логотипам')
     @pytest.mark.parametrize('test_set', [test_data.TEST_SET_FIRST_ORDER, test_data.TEST_SET_SECOND_ORDER,
                                           test_data.TEST_SET_THIRD_ORDER])
     def test_successful_scooter_order(self, test_set):
-        self.driver.get(test_data.MAIN_PAGE_URL)
         main_page = MainPage(self.driver)
+        main_page.open_page(test_data.MAIN_PAGE_URL)
         main_page.accept_cookie()
         main_page.click_on_order_button_nav()
         order_page = OrderPage(self.driver)
@@ -49,12 +51,12 @@ class TestScooterOrder:
         order_page.confirm_order()
         is_appeared = order_page.check_appearance_successful_order_window()
         assert is_appeared == True, 'Окно об успешном создании заказа не появляется!'
-        self.driver.back()
+        order_page.go_back()
         is_main_page = main_page.check_scooter_logo_url()  # до этого все работает!
         assert is_main_page == True, 'Клик по логотипу сервиса не ведёт на главную страницу!'
         is_dzen_redirect = main_page.check_yandex_logo_redirect()
         assert is_dzen_redirect == True, 'По клику на логотип Яндекса не происходит редиректа на станицу Дзена!'
-        self.driver.delete_all_cookies()
+        order_page.delete_all_cookie()
 
     @classmethod
     def teardown_class(cls):

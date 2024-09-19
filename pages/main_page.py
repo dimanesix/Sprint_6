@@ -1,12 +1,11 @@
 import allure
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
 
 import test_data
+from pages.base_page import BasePage
 
 
-class MainPage:
+class MainPage(BasePage):
     order_button_nav = [By.XPATH, './/button[contains(@class, "Button_Button") and text()="Заказать"]']
     order_button_middle = [By.XPATH, './/button[contains(@class, "Button_Middle")]']
     yandex_logo = [By.XPATH, './/a[contains(@class, "LogoYandex")]']
@@ -16,103 +15,71 @@ class MainPage:
     answers_to_questions = [By.XPATH, './/div[@data-accordion-component="AccordionItemPanel"]']
     cookie_button = [By.ID, 'rcc-confirm-button']
 
-    def __init__(self, driver):
-        self.driver = driver
-
-    def click_on_button_accept_cookie(self):
-        self.driver.find_element(*self.cookie_button).click()
-
-    def wait_for_cookie_is_accept(self):
-        WebDriverWait(self.driver, 3).until(
-            expected_conditions.invisibility_of_element_located(self.cookie_button))
-
+    @allure.step('Принять cookie')
     def accept_cookie(self):
-        if self.driver.find_element(*self.cookie_button).is_displayed():
-            self.click_on_button_accept_cookie()
-            self.wait_for_cookie_is_accept()
+        if self.find_element(self.cookie_button).is_displayed():
+            self.click_on_element(self.cookie_button)
+            self.wait_for_element_hide(self.cookie_button)
 
-    def wait_for_load_order_button_nav(self):
-        WebDriverWait(self.driver, 3).until(
-            expected_conditions.visibility_of_element_located(self.order_button_nav))
-
+    @allure.step('Кликнуть по кнопке "Заказать" в шапке')
     def click_on_order_button_nav(self):
-        self.driver.find_element(*self.order_button_nav).click()
+        self.wait_for_load_element(self.order_button_nav)
+        self.click_on_element(self.order_button_nav)
 
-    @allure.step('Проверяем точку входа с кнопки "Заказать" в шапке')
+    @allure.step('Проверка точки входа с кнопки "Заказать" в шапке')
     def check_url_from_order_button_nav(self):
-        self.wait_for_load_order_button_nav()
         self.click_on_order_button_nav()
-        return self.driver.current_url == test_data.ORDER_PAGE_URL
+        return self.get_current_url() == test_data.ORDER_PAGE_URL
 
-    def wait_for_load_order_button_middle(self):
-        WebDriverWait(self.driver, 3).until(
-            expected_conditions.visibility_of_element_located(self.order_button_middle))
-
-    def scroll_to_order_button_middle(self):
-        self.driver.execute_script(test_data.SCROLL_SCRIPT, self.driver.find_element(*self.question_buttons))
-
+    @allure.step('Кликнуть по кнопке "Заказать" в середине экрана')
     def click_on_order_button_middle(self):
-        self.driver.find_element(*self.order_button_middle).click()
+        self.wait_for_load_element(self.order_button_middle)
+        self.execute_script(test_data.SCROLL_SCRIPT, self.find_element(self.order_button_middle))
+        self.click_on_element(self.order_button_middle)
 
-    @allure.step('Проверяем точку входа с кнопки "Заказать" в середине экрана')
+    @allure.step('Проверка точки входа с кнопки "Заказать" в середине экрана')
     def check_url_from_order_button_middle(self):
-        self.wait_for_load_order_button_middle()
-        self.scroll_to_order_button_middle()
         self.click_on_order_button_middle()
-        return self.driver.current_url == test_data.ORDER_PAGE_URL
+        return self.get_current_url() == test_data.ORDER_PAGE_URL
 
-    def wait_for_load_yandex_logo(self):  # main_scooter_page, dzen_page
-        WebDriverWait(self.driver, 3).until(
-            expected_conditions.visibility_of_element_located(self.yandex_logo))
+    @allure.step('Получить адрес редиректа Дзена')
+    def get_redirect_page(self, windows):
+        self.go_to_window(windows[1])
+        self.wait_url_to_be(test_data.DZEN_REDIRECT_PAGE_URL)
+        return self.get_current_url()
 
-    @allure.step('Кликаем на логотип Яндекса')
-    def click_on_yandex_logo(self):
-        self.driver.find_element(*self.yandex_logo).click()
-
-    def wait_for_redirect(self):
-        return WebDriverWait(self.driver, 10).until(
-            lambda driver: self.driver.current_url != test_data.DZEN_REDIRECT_PAGE_URL)
-
-    @allure.step('Проверяем редирект на страницу Дзена')
+    @allure.step('Проверить редирект на страницу Дзена при клике на логотип Яндекса')
     def check_yandex_logo_redirect(self):
-        self.wait_for_load_yandex_logo()
-        self.click_on_yandex_logo()
-        return self.wait_for_redirect()
+        self.wait_for_load_element(self.yandex_logo)
+        self.click_on_element(self.yandex_logo)
+        windows = self.get_windows()
+        dzen_url = self.get_redirect_page(windows)
+        self.go_to_window(windows[0])
+        return dzen_url == test_data.DZEN_REDIRECT_PAGE_URL
 
-    def wait_for_load_scooter_logo(self):
-        WebDriverWait(self.driver, 3).until(
-            expected_conditions.visibility_of_element_located(self.scooter_logo))
-
-    @allure.step('Кликаем на логотип сервиса Яндекс Самокат')
-    def click_on_scooter_logo(self):
-        self.driver.find_element(*self.scooter_logo).click()
-
-    @allure.step('Проверяем переход на главную страницу')
+    @allure.step('Проверить переход на главную страницу при клике на логотип Яндекс Самокат')
     def check_scooter_logo_url(self):
-        self.wait_for_load_scooter_logo()
-        self.click_on_scooter_logo()
-        return self.driver.current_url == test_data.MAIN_PAGE_URL
+        self.wait_for_load_element(self.scooter_logo)
+        self.click_on_element(self.scooter_logo)
+        return self.get_current_url() == test_data.MAIN_PAGE_URL
 
-    def wait_for_load_important_questions(self):
-        WebDriverWait(self.driver, 3).until(
-            expected_conditions.visibility_of_element_located(self.important_question_reg))
-
-    @allure.step('Переходим к вопросу')
+    @allure.step('Пролистать до важного вопроса')
     def scroll_to_important_question(self, question_number):
-        questions = self.driver.find_elements(*self.question_buttons)
-        self.driver.execute_script(test_data.SCROLL_SCRIPT, questions[question_number - 1])
+        questions = self.find_elements(self.question_buttons)
+        self.execute_script(test_data.SCROLL_SCRIPT, questions[question_number - 1])
 
-    @allure.step('Кликаем на вопрос')
+    @allure.step('Кликнуть на вопрос')
     def click_on_important_question(self, question_number):
-        questions = self.driver.find_elements(*self.question_buttons)
+        questions = self.find_elements(self.question_buttons)
         questions[question_number - 1].click()
 
-    @allure.step('Проверяем, что появляется ответ')
+    @allure.step('Проверить, что появляется ответ')
     def check_roll_down_answer_to_the_question(self, question_number):
-        return self.driver.find_elements(*self.answers_to_questions)[question_number - 1].get_attribute('hidden')
+        return self.find_elements(self.answers_to_questions)[question_number - 1].get_attribute('hidden')
 
+    @allure.step('Повзаимодействовать с важным вопросом')
     def interaction_with_important_question(self, question_number):
-        self.wait_for_load_important_questions()
+        self.wait_for_load_element(self.important_question_reg)
         self.scroll_to_important_question(question_number)
         self.click_on_important_question(question_number)
         self.check_roll_down_answer_to_the_question(question_number)
